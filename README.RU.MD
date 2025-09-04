@@ -89,7 +89,7 @@ import { AminoDorks } from 'amino.dorks';
 
 ```typescript
 import { AminoDorks } from 'amino.dorks';
-import { MessageEvent } from 'amino.dorks/dist/schemas/sockets/sockets';
+import { MessageEvent } from 'amino.dorks/dist/schemas';
 
 (async () => {
     const aminoDorks = new AminoDorks({
