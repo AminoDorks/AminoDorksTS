@@ -82,6 +82,10 @@ export class AminoDorksAPIError extends Error {
             message: 'Login with your Google account failed. Please try again or log in with your email.',
             name: 'AminoDorksError.GoogleLoginFailed',
         },
+        207: {
+            message: 'Account email update is not allowed.',
+            name: 'AminoDorksError.EmailUpdateNotAllowed',
+        },
         208: {
             message: 'Google account disconnect is not allowed.',
             name: 'AminoDorksError.GoogleDisconnectNotAllowed',

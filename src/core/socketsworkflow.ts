@@ -68,6 +68,7 @@ export class SocketWorkflow {
         });
         LOGGER.info({ url: this.__websocket.url }, 'Socket connected.');
         this.__setupSocketWorkflow();
+        this.__getElapsedRealtime();
     }
 
     private __getCreateNdc = (ndcId: number): AminoDorks => this.__ndcs.get(ndcId) || (this.__ndcs.set(ndcId, this.__client.as(ndcId)).get(ndcId) as AminoDorks);

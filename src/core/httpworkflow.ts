@@ -15,8 +15,8 @@ import { socksDispatcher } from 'fetch-socks';
 export class HttpWorkflow {
     private __headers: HeadersType = API_HEADERS;
     private __generatorsHeaders: HeadersType = GENERATORS_HEADERS;
-    private readonly __proxies: string[] = [];
 
+    private readonly __proxies: string[];
     private readonly __generatorsPool: Pool;
     private __currentDispatcher: MayUndefined<ProxyAgent>;
 
@@ -38,10 +38,7 @@ export class HttpWorkflow {
 
     // TODO: add catching of errors
     private __switchProxy = () => {
-        if (this.__currentDispatcher) {
-            this.__currentDispatcher.close();
-
-        };
+        if (this.__currentDispatcher) this.__currentDispatcher.close();
         const randomProxy = this.__proxies[Math.floor(Math.random() * this.__proxies.length)];
         this.__proxies.splice(this.__proxies.indexOf(randomProxy), 1);
 
@@ -51,7 +48,7 @@ export class HttpWorkflow {
             }
         });
         LOGGER.info({socks: randomProxy}, 'Switched proxy.');
-    }
+    };
 
     private __generateECDSA = async (payloadBody: Safe<string>): Promise<GenerateECDSAResponse> => {
         const { body } = await this.__generatorsPool.request({
