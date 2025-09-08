@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+
+    /* Modules */
+    "module": "nodenext",
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+
+    /* JavaScript Support */
+    "allowJs": true,
+
+    /* Emit */
+    "outDir": "./dist",
+
+    /* Interop Constraints */
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    /* Type Checking */
+    "strict": true,
+
+    /* Completeness */
+    "skipLibCheck": true
+  },
+  "ts-node": {"esm": true},
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
