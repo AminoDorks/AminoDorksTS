@@ -425,6 +425,12 @@ Specified class for interacting with AminoDorks via Sockets and catching events 
 
 15. `sendEndRecording(ndcId: Safe<number>, threadId: Safe<string>, duration: Safe<number>): void` - Signals the end of a voice recording, including the duration of the recorded audio.
 
+16. `sendNdcBrowsing(ndcId: Safe<number>, topicIds: Safe<number[]> = []): void` - Sends a "ndc browsing" signal to indicate that the user is browsing a specific NDC.
+
+17. `sendNdcEnter(ndcId: Safe<number>): void` - Sends a "ndc enter" signal to indicate that the user has entered a specific NDC.
+
+18. `sendChatting(ndcId: Safe<number>, threadId: Safe<string>, topicIds: Safe<number[]> = []): void` - Sends a "chatting" signal to indicate that the user is actively chatting in a specific thread. 
+
 ## Contributing
 ------------
 

@@ -423,6 +423,12 @@ config – конфигурация библиотеки, доступна в т
 
 15. `sendEndRecording(ndcId: Safe<number>, threadId: Safe<string>, duration: Safe<number>): void` – завершение записи аудио  
 
+16. `sendNdcBrowsing(ndcId: Safe<number>, topicIds: Safe<number[]> = []): void` - отправка индикатора активности в сообществе (отображение в списке участников онлайн)
+
+17. `sendNdcEnter(ndcId: Safe<number>): void` - индикатор входа в сообщество
+
+18. `sendChatting(ndcId: Safe<number>, threadId: Safe<string>, topicIds: Safe<number[]> = []): void` - отправка индикатора активности в определённом чате (отображение в списке участников которые сидят в чате)
+
 ## Участие в разработке
 
 Приветствуются любые улучшения! Пожалуйста, отправляйте pull request со своими изменениями.

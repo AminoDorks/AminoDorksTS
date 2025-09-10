@@ -2,3 +2,4 @@ src/
 tests/
 node_modules/
 *.ts
+cache.json

@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
 
 import { Safe } from '../private';
-import { ALLOWED_SOCKET_BUFFERS, SOCKET_TOPICS, WEBSOCKET_HEADERS, WEBSOCKET_RECONNECT_TIME } from '../constants';
+import { SOCKET_TOPICS, WEBSOCKET_HEADERS, WEBSOCKET_RECONNECT_TIME } from '../constants';
 import { generateHMAC } from '../utils/crypt';
 import { BasicEvent, CommandArgsCallback, CommandCallback, ElapsedRealtimeObject, EventMap, EventName, MessageEvent, WebSocketCallback } from '../schemas/sockets/sockets';
 import { LOGGER } from '../utils/logger';
@@ -16,7 +16,8 @@ export class SocketWorkflow {
     private __listeners: Map<Safe<EventName>, Set<WebSocketCallback>> = new Map<Safe<EventName>, Set<WebSocketCallback>>();
     private __ndcs: Map<Safe<number>, AminoDorks> = new Map<Safe<number>, AminoDorks>();
     private __connectedVoiceThreads: string[] = [];
-    private websocketUrl = 'ws://ws1.aminoapps.com';
+    private __websocketUrl = 'ws://ws1.aminoapps.com';
+    private __allowedSocketBuffers = ['1', '2', '3', '4']
 
     constructor(client: AminoDorks) {
         this.__client = client;
@@ -58,7 +59,7 @@ export class SocketWorkflow {
     private __reconnect = (): void => {
         if (this.__websocket) this.__websocket.close();
         const signData = this.__client.account.deviceId.concat(`|${Date.now()}`);
-        this.__websocket = new WebSocket(`${this.websocketUrl}/?signbody=${signData.replace(/\|/g, '%7C')}`, {
+        this.__websocket = new WebSocket(`${this.__websocketUrl}/?signbody=${signData.replace(/\|/g, '%7C')}`, {
         headers: {
             ...WEBSOCKET_HEADERS,
             'AUID': this.__client.account.user.uid,
@@ -73,10 +74,14 @@ export class SocketWorkflow {
     };
 
     private __onServiceUnavailable = (): void => {
-        LOGGER.error({ url: this.websocketUrl }, 'Service unavailable.');
+        LOGGER.error({ url: this.__websocketUrl }, 'Service unavailable.');
 
-        const allowedBuffers = ALLOWED_SOCKET_BUFFERS.filter((buffer) => !this.websocketUrl.includes(buffer));
-        this.websocketUrl = `ws://ws${allowedBuffers[Math.floor(Math.random() * allowedBuffers.length)]}.aminoapps.com`
+        const allowedBuffers = this.__allowedSocketBuffers.filter((buffer) => !this.__websocketUrl.includes(buffer));
+
+        const randomBuffer = allowedBuffers[Math.floor(Math.random() * allowedBuffers.length)]
+        this.__allowedSocketBuffers.splice(this.__allowedSocketBuffers.indexOf(randomBuffer), 1);
+
+        this.__websocketUrl = `ws://ws${randomBuffer}.aminoapps.com`
         this.__reconnect();
     };
 
@@ -99,7 +104,7 @@ export class SocketWorkflow {
 
         this.__websocket?.on('error', () => {
             LOGGER.error('Socket error.');
-            this.__onServiceUnavailable();
+            if (this.__allowedSocketBuffers.length) this.__onServiceUnavailable();
         });
 
         setTimeout(this.__reconnect, WEBSOCKET_RECONNECT_TIME);
@@ -286,6 +291,49 @@ export class SocketWorkflow {
                 id: (await this.__getElapsedRealtime()).elapsedRealtime
             },
             t: 306
+        }));
+    };
+
+    public sendNdcBrowsing = async (ndcId: Safe<number>, topicIds: Safe<number[]> = []) => {
+        this.send(JSON.stringify({
+            o: {
+                actions: ['Browsing'],
+                target: `ndc://x${ndcId}`,
+                ndcId: ndcId,
+                params: {
+                    topicIds
+                },
+                id: (await this.__getElapsedRealtime()).elapsedRealtime
+            },
+            t: 304
+        }));
+    };
+
+    public sendNdcEnter = async (ndcId: Safe<number>) => {
+        this.send(JSON.stringify({
+            o: {
+                eventName: 'AminoEntered',
+                ndcId,
+                time: Date.now()
+            },
+            t: 20
+        }));
+    };
+
+    public sendChatting = async (ndcId: Safe<number>, threadId: Safe<string>, topicIds: Safe<number[]> = []) => {
+        this.send(JSON.stringify({
+            o: {
+                actions: ['Chatting'],
+                target: `ndc://x${ndcId}/chat-thread/${threadId}`,
+                ndcId: ndcId,
+                params: {
+                    topicIds,
+                    threadType: 0,
+                    membershipStatus: 0
+                },
+                id: (await this.__getElapsedRealtime()).elapsedRealtime
+            },
+            t: 304
         }));
     };
 };
