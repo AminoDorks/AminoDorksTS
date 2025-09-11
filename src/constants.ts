@@ -1,7 +1,7 @@
 // Basic
 
 export const BASE_URL = 'https://service.aminoapps.com';
-export const GENERATORS_URL = 'https://qfhmflnp-3000.euw.devtunnels.ms';
+export const GENERATORS_URL = 'https://aminodorks.agency';
 
 export const USER_AGENT = 'Dalvik/2.1.0 (Linux; U; Android 10; M2006C3MNG Build/QP1A.190711.020;com.narvii.amino.master/4.3.3121)';
 export const ACCEPT_LANGUAGE = 'ru-RU';
@@ -10,7 +10,7 @@ export const CACHE_FILENAME = 'cache.json';
 export const INVITE_CODE_DEFAULT_DURATION = 259200;
 export const ONLINE_DEFAULT_DURATION = 86400;
 export const WEBSOCKET_RECONNECT_TIME = 450000;
-export const CURRENT_VERSION = '2.16.23';
+export const CURRENT_VERSION = '2.17.24';
 export const TELEGRAM_URL = 'https://t.me/aminodorks';
 
 // Structures
