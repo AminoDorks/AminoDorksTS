@@ -68,6 +68,11 @@ export const GetWalletHistoryResponseSchema = z.object({
     coinHistoryList: z.array(TransactionSchema)
 });
 
+export const GetBlockListResponseSchema = z.object({
+    ...BasicResponseSchema.shape,
+    blockerUidList: z.array(z.string())
+});
+
 export type LoginResponse = z.infer<typeof LoginResponseSchema>;
 export type GetAccountResponse = z.infer<typeof GetAccountResponseSchema>;
 export type UploadMediaResponse = z.infer<typeof UploadMediaResponseSchema>;
@@ -77,3 +82,4 @@ export type GetCommunitiesResponse = z.infer<typeof GetCommunitiesResponseSchema
 export type SearchCommunityResponse = z.infer<typeof SearchCommunityResponseSchema>;
 export type GetWalletResponse = z.infer<typeof GetWalletResponseSchema>;
 export type GetWalletHistoryResponse = z.infer<typeof GetWalletHistoryResponseSchema>;
+export type GetBlockListResponse = z.infer<typeof GetBlockListResponseSchema>;

@@ -5,12 +5,13 @@ import BodyReadable from 'undici/types/readable';
 import { API_HEADERS, BASE_URL, EMPTY_BODY, GENERATORS_HEADERS, GENERATORS_URL } from '../constants';
 import { HeadersType, MayUndefined, Safe } from '../private';
 import { generateHMAC } from '../utils/crypt';
-import { AllConfigs, BufferRequestConfig, DeleteRequestConfig, GenerateECDSAResponse, GenerateECDSAResponseSchema, GetElapsedRealtime, GetElapsedRealtimeSchema, GetPublicKeyCredentialsResponse, GetPublicKeyCredentialsResponseSchema, GetRequestConfig, PostRequestConfig, RawRequestConfig, UrlEncodedRequestConfig } from '../schemas/httpworkflow';
+import { AllConfigs, BufferRequestConfig, DeleteRequestConfig, GenerateECDSAResponseSchema, GetElapsedRealtime, GetElapsedRealtimeSchema, GetPublicKeyCredentialsResponse, GetPublicKeyCredentialsResponseSchema, GetRequestConfig, PostRequestConfig, RawRequestConfig, UrlEncodedRequestConfig } from '../schemas/httpworkflow';
 import { BasicResponseSchema } from '../schemas/responses/basic';
 import { LOGGER } from '../utils/logger';
-import { convertProxy } from '../utils/utils';
+import { convertProxy, isStatusOk } from '../utils/utils';
 import { AminoDorksAPIError } from '../exceptions/api';
 import { socksDispatcher } from 'fetch-socks';
+import { DorksAPIError } from '../exceptions/dorks';
 
 export class HttpWorkflow {
     private __headers: HeadersType = API_HEADERS;
@@ -36,7 +37,6 @@ export class HttpWorkflow {
         };
     };
 
-    // TODO: add catching of errors
     private __switchProxy = () => {
         if (this.__currentDispatcher) this.__currentDispatcher.close();
         const randomProxy = this.__proxies[Math.floor(Math.random() * this.__proxies.length)];
@@ -50,7 +50,7 @@ export class HttpWorkflow {
         LOGGER.info({socks: randomProxy}, 'Switched proxy.');
     };
 
-    private __generateECDSA = async (payloadBody: Safe<string>): Promise<GenerateECDSAResponse> => {
+    private __generateECDSA = async (payloadBody: Safe<string>): Promise<string> => {
         const { body } = await this.__generatorsPool.request({
             path: '/api/v1/signature/ecdsa',
             method: 'POST',
@@ -61,7 +61,11 @@ export class HttpWorkflow {
             })
         });
 
-        return GenerateECDSAResponseSchema.parse(await body.json());
+        const response = GenerateECDSAResponseSchema.parse(await body.json());
+
+        if (!response.ECDSA) throw new DorksAPIError(response.message);
+
+        return response.ECDSA;
     };
 
     private __configureHeaders = (body: Buffer, contentType?: string): HeadersType => {
@@ -78,18 +82,19 @@ export class HttpWorkflow {
     private __configurePostHeaders = async (body: Buffer, contentType?: string): Promise<HeadersType> => {
         const configuredHeaders = this.__configureHeaders(body, contentType);
 
-        configuredHeaders['NDC-MESSAGE-SIGNATURE'] = (await this.__generateECDSA(body.toString('utf-8'))).ECDSA;
+        configuredHeaders['NDC-MESSAGE-SIGNATURE'] = (await this.__generateECDSA(body.toString('utf-8')));
 
         return configuredHeaders;
     };
 
-    private __handleResponse = async <T>(fullPath: string, body: BodyReadable & Dispatcher.BodyMixin, schema: z.ZodSchema): Promise<T> => {
-        let rawBody: unknown;
+    private __handleResponse = async <T>(statusCode: number, fullPath: string, body: BodyReadable & Dispatcher.BodyMixin, schema: z.ZodSchema): Promise<T> => {
+        let rawBody;
         
         try {
             rawBody = await body.json();
         } catch {
-            rawBody = JSON.parse(await body.text());
+            if (!isStatusOk(statusCode)) AminoDorksAPIError.throw(statusCode);
+            rawBody = await body.text();
         };
 
         const responseSchema = BasicResponseSchema.parse(rawBody);
@@ -129,7 +134,11 @@ export class HttpWorkflow {
             headers: this.__generatorsHeaders
         });
 
-        return GetPublicKeyCredentialsResponseSchema.parse(await body.json());
+        const response = GetPublicKeyCredentialsResponseSchema.parse(await body.json());
+
+        if (!response.credentials) throw new DorksAPIError(response.message);
+
+        return response;
     };
 
     public getElapsedRealtime = async (): Promise<GetElapsedRealtime> => {
@@ -144,7 +153,7 @@ export class HttpWorkflow {
 
     public sendRaw = async <T>(config: RawRequestConfig, schema: z.ZodSchema): Promise<T> => {
         const callback = async (config: RawRequestConfig, schema: z.ZodSchema) => {
-            const { body } = await request(`${BASE_URL}/api/v1${config?.path}`, {
+            const { statusCode, body } = await request(`${BASE_URL}/api/v1${config?.path}`, {
                 method: config?.method || 'GET',
                 headers: {
                     ...this.__headers,
@@ -152,7 +161,7 @@ export class HttpWorkflow {
                 },
                 dispatcher: this.__currentDispatcher
             });
-            return await this.__handleResponse<T>(`${BASE_URL}/api/v1${config?.path}`, body, schema);
+            return await this.__handleResponse<T>(statusCode, `${BASE_URL}/api/v1${config?.path}`, body, schema);
         };
         
         const handler = await this.__withErrorHandler(callback as (config: AllConfigs, schema: z.ZodSchema) => Promise<T>);
@@ -166,13 +175,13 @@ export class HttpWorkflow {
 
             if (config.contentType) mergedHeaders['Content-Type'] = config.contentType
             
-            const { body } = await request(`${BASE_URL}/api/v1${config?.path}`, {
+            const { statusCode, body } = await request(`${BASE_URL}/api/v1${config?.path}`, {
                 method: 'GET',
                 headers: mergedHeaders,
                 dispatcher: this.__currentDispatcher
             });
 
-            return await this.__handleResponse<T>(`${BASE_URL}/api/v1${config.path}`, body, schema);
+            return await this.__handleResponse<T>(statusCode, `${BASE_URL}/api/v1${config.path}`, body, schema);
         };
 
         const handler = await this.__withErrorHandler(callback as (config: AllConfigs, schema: z.ZodSchema) => Promise<T>);
@@ -182,13 +191,13 @@ export class HttpWorkflow {
 
     public sendDelete = async <T>(config: DeleteRequestConfig, schema: z.ZodSchema): Promise<T> => {
         const callback = async (config: DeleteRequestConfig, schema: z.ZodSchema) => {
-            const { body } = await request(`${BASE_URL}/api/v1${config?.path}`, {
+            const { statusCode, body } = await request(`${BASE_URL}/api/v1${config?.path}`, {
                 method: 'DELETE',
                 headers: this.__headers,
                 dispatcher: this.__currentDispatcher
             });
 
-            return await this.__handleResponse<T>(`${BASE_URL}/api/v1${config.path}`, body, schema);
+            return await this.__handleResponse<T>(statusCode, `${BASE_URL}/api/v1${config.path}`, body, schema);
         };
 
         const handler = await this.__withErrorHandler(callback as (config: AllConfigs, schema: z.ZodSchema) => Promise<T>);
@@ -198,14 +207,14 @@ export class HttpWorkflow {
 
     public sendPost = async <T>(config: PostRequestConfig, schema: z.ZodSchema): Promise<T> => {
         const callback = async (config: PostRequestConfig, schema: z.ZodSchema): Promise<T> => {
-            const { body } = await request(`${BASE_URL}/api/v1${config?.path}`, {
+            const { statusCode, body } = await request(`${BASE_URL}/api/v1${config?.path}`, {
                 method: 'POST',
                 headers: await this.__configurePostHeaders(Buffer.from(config.body), config.contentType),
                 body: config.body,
                 dispatcher: this.__currentDispatcher
             });
 
-            return await this.__handleResponse<T>(`${BASE_URL}/api/v1${config.path}`, body, schema);
+            return await this.__handleResponse<T>(statusCode, `${BASE_URL}/api/v1${config.path}`, body, schema);
         };
 
         const handler = await this.__withErrorHandler(callback as (config: AllConfigs, schema: z.ZodSchema) => Promise<T>);
@@ -217,14 +226,14 @@ export class HttpWorkflow {
         const callback = async (config: PostRequestConfig, schema: z.ZodSchema): Promise<T> => {
             const bufferedBody = Buffer.from(config.body);
 
-            const { body } = await request(`${BASE_URL}/api/v1${config?.path}`, {
+            const { statusCode, body } = await request(`${BASE_URL}/api/v1${config?.path}`, {
                 method: 'POST',
                 headers: this.__configureHeaders(bufferedBody, config.contentType),
                 body: bufferedBody,
                 dispatcher: this.__currentDispatcher
             });
 
-            return await this.__handleResponse<T>(`${BASE_URL}/api/v1${config.path}`, body, schema);
+            return await this.__handleResponse<T>(statusCode, `${BASE_URL}/api/v1${config.path}`, body, schema);
         };
 
         const handler = await this.__withErrorHandler(callback as (config: AllConfigs, schema: z.ZodSchema) => Promise<T>);
@@ -242,14 +251,14 @@ export class HttpWorkflow {
 
     public sendBuffer = async <T>(config: BufferRequestConfig, schema: z.ZodSchema): Promise<T> => {
         const callback = async (config: BufferRequestConfig, schema: z.ZodSchema): Promise<T> => {
-            const { body } = await request(`${BASE_URL}/api/v1${config?.path}`, {
+            const { statusCode, body } = await request(`${BASE_URL}/api/v1${config?.path}`, {
                 method: 'POST',
                 headers: this.__configureHeaders(config.body, config.contentType),
                 body: config.body,
                 dispatcher: this.__currentDispatcher
             });
 
-            return await this.__handleResponse<T>(`${BASE_URL}/api/v1${config.path}`, body, schema);
+            return await this.__handleResponse<T>(statusCode, `${BASE_URL}/api/v1${config.path}`, body, schema);
         };
 
         const handler = await this.__withErrorHandler(callback as (config: AllConfigs, schema: z.ZodSchema) => Promise<T>);

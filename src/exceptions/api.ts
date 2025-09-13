@@ -198,6 +198,14 @@ export class AminoDorksAPIError extends Error {
             message: 'Invalid voice note.',
             name: 'AminoDorksError.InvalidVoiceNote',
         },
+        403: {
+            message: 'Forbidden.',
+            name: 'AminoDorksError.Forbidden',
+        },
+        429: {
+            message: 'Too many requests. Please try again later.',
+            name: 'AminoDorksError.TooManyRequests',
+        },
         500: {
             message: 'Sorry, the requested data no longer exists. Try refreshing the view.',
             name: 'AminoDorksError.RequestedNoLongerExists',

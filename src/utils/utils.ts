@@ -1,6 +1,8 @@
 import { SocksProxies } from 'fetch-socks';
 import { UTC } from '../constants';
 
+export const isStatusOk = (status: number) => status >= 200 && status < 300;
+
 export const getTimezone = () => UTC[new Date().getUTCMinutes() % UTC.length];
 
 export const formatMediaList = (rawMediaList: string[]) => rawMediaList.map((media) => [100, media, null]);

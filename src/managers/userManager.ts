@@ -10,6 +10,7 @@ import { Account } from '../schemas/aminodorks';
 import { LOGGER } from '../utils/logger';
 import { formatMedia } from '../utils/utils';
 import { MembersResponse, MembersResponseSchema } from '../schemas/responses/ndc';
+import { GetBlockListResponse, GetBlockListResponseSchema } from '../schemas';
 
 export class UserManager implements APIManager {
     endpoint: Safe<string> = '/g/s';
@@ -98,6 +99,12 @@ export class UserManager implements APIManager {
         return (await this.__httpWorkflow.sendGet<GetUsersResponse>({
             path: `${this.endpoint}/user-profile/${userId}/member?start=${startSize.start}&size=${startSize.size}`
         }, GetUsersResponseSchema)).userProfileList;
+    };
+
+    public getBlockList = async (): Promise<string[]> => {
+        return (await this.__httpWorkflow.sendGet<GetBlockListResponse>({
+            path: `${this.endpoint}/block/full-list`
+        }, GetBlockListResponseSchema)).blockerUidList;
     };
 
     public getWallComments = async (userId: Safe<string>, sorting: CommentsSorting = 'newest', startSize: StartSize = { start: 0, size: 25 }): Promise<Comment[]> => {

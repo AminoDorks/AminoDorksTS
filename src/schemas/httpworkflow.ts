@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const GenerateECDSAResponseSchema = z.object({
-    ECDSA: z.string().readonly(),
+    ECDSA: z.string().readonly().optional(),
     message: z.string().readonly()
 });
 
@@ -11,7 +11,8 @@ export const GetPublicKeyCredentialsResponseSchema = z.object({
         token: z.string().readonly(),
         uid: z.string().readonly(),
         timestamp: z.number().readonly()
-    })
+    }).optional(),
+    message: z.string().readonly()
 });
 
 export const GetElapsedRealtimeSchema = z.object({
@@ -41,7 +42,6 @@ export const BufferRequestConfigSchema = z.object({
 
 export const AllConfigs = z.union([GetRequestConfigSchema, PostRequestConfigSchema, UrlEncodedRequestConfigSchema, DeleteRequestConfigSchema, RawRequestConfigSchema, BufferRequestConfigSchema]);
 
-export type GenerateECDSAResponse = z.infer<typeof GenerateECDSAResponseSchema>;
 export type GetPublicKeyCredentialsResponse = z.infer<typeof GetPublicKeyCredentialsResponseSchema>;
 export type PostRequestConfig = z.infer<typeof PostRequestConfigSchema>;
 export type GetRequestConfig = z.infer<typeof GetRequestConfigSchema>;
