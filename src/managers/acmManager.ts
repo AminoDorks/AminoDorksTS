@@ -1,8 +1,13 @@
+import sharp from 'sharp';
+import { fetch } from 'undici';
+
 import { APIManager } from '../interfaces/manager';
 import { HttpWorkflow } from '../core/httpworkflow';
 import { Safe } from '../private';
 import { BasicResponse, BasicResponseSchema } from '../schemas/responses/basic';
-import { getIconCredentials, getMediaCredentials } from '../utils/utils';
+import { getIconCredentials, getCoverCredentials } from '../utils/utils';
+import { AminoDorksAPIError } from '../exceptions/api';
+import { ImageMetadata } from '../public';
 
 export class ACMManager implements APIManager {
     endpoint: Safe<string>;
@@ -12,6 +17,16 @@ export class ACMManager implements APIManager {
     constructor(ndcId: Safe<number>, httpWorkflow: HttpWorkflow) {
         this.endpoint = `/x${ndcId}/s`;
         this.__httpWorkflow = httpWorkflow;
+    };
+
+    public __fetchMediaMetadata = async (url: Safe<string>): Promise<ImageMetadata> => {
+        try {
+            const response = await fetch(url);
+            if (response.status !== 200) AminoDorksAPIError.throw(response.status);
+
+            const metadata = await sharp(Buffer.from(await response.arrayBuffer())).metadata();
+            return { width: metadata.width, height: metadata.height };
+        } catch { AminoDorksAPIError.throw(300); }
     };
 
     public setEndpoint = async (enpoint: Safe<string>): Promise<BasicResponse> => {
@@ -24,21 +39,25 @@ export class ACMManager implements APIManager {
         }, BasicResponseSchema);
     };
 
-    public icon = async (icon: Safe<string>, width: Safe<number>, height: Safe<number>): Promise<BasicResponse> => {
+    public icon = async (icon: Safe<string>): Promise<BasicResponse> => {
+        const metadata = await this.__fetchMediaMetadata(icon);
+
         return await this.__httpWorkflow.sendPost<BasicResponse>({
             path: `${this.endpoint}/community/settings`,
             body: JSON.stringify({
-                icon: getIconCredentials(icon, width, height),
+                icon: getIconCredentials(icon, metadata.width, metadata.height),
                 timestamp: Date.now()
             })
         }, BasicResponseSchema);
     };
 
-    public media = async (media: Safe<string>): Promise<BasicResponse> => {
+    public cover = async (cover: Safe<string>): Promise<BasicResponse> => {
+        const metadata = await this.__fetchMediaMetadata(cover);
+
         return await this.__httpWorkflow.sendPost<BasicResponse>({
             path: `${this.endpoint}/community/settings`,
             body: JSON.stringify({
-                promotionalMediaList: getMediaCredentials(media),
+                promotionalMediaList: getCoverCredentials(cover, metadata.width, metadata.height),
                 timestamp: Date.now()
             })
         }, BasicResponseSchema);

@@ -78,6 +78,10 @@ export class AminoDorksAPIError extends Error {
             message: 'Invalid account or password.',
             name: 'AminoDorksError.InvalidAccountOrPassword',
         },
+        202: {
+            message: 'Login with your Facebook account failed. Please try again or log in with your email.',
+            name: 'AminoDorksError.FacebookLoginFailed',
+        },
         203: {
             message: 'Login with your Google account failed. Please try again or log in with your email.',
             name: 'AminoDorksError.GoogleLoginFailed',

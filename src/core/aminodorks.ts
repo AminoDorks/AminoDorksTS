@@ -142,8 +142,16 @@ export class AminoDorks {
         }, UploadMediaResponseSchema);
     };
 
-    public uploadMedia = async (file: Safe<Buffer>, type: Safe<MediaType>): Promise<UploadMediaResponse> => {
-        return await this.__basicUpload('/g/s/media/upload', file, type);
+    public uploadMedia = async (file: Safe<Buffer>, type: Safe<MediaType>): Promise<string> => {
+        return (await this.__basicUpload('/g/s/media/upload', file, type)).mediaValue;
+    };
+
+    public uploadCommunityIcon = async (file: Safe<Buffer>): Promise<string> => {
+        return (await this.__basicUpload('/g/s/media/upload/target/community-icon', file, 'image/jpg')).mediaValue;
+    };
+
+    public uploadCommunityCover = async (file: Safe<Buffer>): Promise<string> => {
+        return (await this.__basicUpload('/g/s/media/upload/target/community-launch-image', file, 'image/jpg')).mediaValue;
     };
 
     public getLinkResolution = async (link: Safe<string>): Promise<LinkInfo> => {

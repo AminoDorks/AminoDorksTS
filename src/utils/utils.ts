@@ -39,10 +39,10 @@ export const getIconCredentials = (icon: string, width: number, height: number) 
     };
 };
 
-export const getMediaCredentials = async (thumbnail: string) => {
+export const getCoverCredentials = async (thumbnail: string, width: number, height: number) => {
     return [
         {
-            height: 736.0,
+            height: height.toFixed(1),
             imageMatrix: [
                 1.1603261232376099,
                 0.0,
@@ -55,8 +55,8 @@ export const getMediaCredentials = async (thumbnail: string) => {
                 1.0
             ],
             path: thumbnail,
-            width: 413.6767883300781,
-            x: 161.16159057617188,
+            width: width.toFixed(1),
+            x: 0.0,
             y: 0.0
         }
     ];

@@ -5,7 +5,7 @@ import { MayUndefined, Safe } from '../private';
 import { Account, AccountSchema, CachedAccount } from '../schemas/aminodorks';
 import { GetAccountResponse, GetAccountResponseSchema, LoginResponse, LoginResponseSchema } from '../schemas/responses/global';
 import { BasicResponse, BasicResponseSchema } from '../schemas/responses/basic';
-import { UpdateEmailBuilder } from '../public';
+import { RegisterBuilder, UpdateEmailBuilder } from '../public';
 import { LOGGER } from '../utils/logger';
 import { cacheSet, QUICKLRU } from '../utils/qucklru';
 import { decodeSession } from '../utils/crypt';
@@ -176,26 +176,21 @@ export class SecurityManager implements APIManager {
         return await this.__updatePublicKey(sessionData.userId);
     };
 
-    public register = async (token: Safe<string>, password: Safe<string>, nickname: Safe<string>, deviceId?: Safe<string>): Promise<BasicResponse> => {
-        const chosenDeviceId = deviceId || this.__httpWorkflow.getHeader('NDCDEVICEID');
+    public register = async (builder: RegisterBuilder): Promise<BasicResponse> => {
+        const chosenDeviceId = builder.deviceId || this.__httpWorkflow.getHeader('NDCDEVICEID');
 
         return await this.__httpWorkflow.sendEarlyPost<BasicResponse>({
             path: `${this.endpoint}/auth/login`,
             body: JSON.stringify({
-                secret: `30 ${token}`,
-                secret2: `0 ${password}`,
+                secret: `${builder.tokenType} ${builder.token}`,
+                secret2: `0 ${builder.password}`,
                 deviceID: chosenDeviceId,
                 clientType: 100,
-                nickname: nickname,
+                nickname: builder.nickname,
                 latitude: 0,
                 longitude: 0,
                 address: null,
                 clientCallbackURL: 'aminoapp://relogin',
-                deviceID3: 'FF1C74F61CE6248F53B0B2712591EFC5E3462A48CB58', // idk where it comes from
-                deviceID4: 'FF1CB6589FC6AB0DC82CF12099D1C2D40AB994E8410C',
-                deviceID5: 'FF1CF559EEC104D2C3D8635600D165ED69EA9C580BAD',
-                val1: 85,
-                val2: 84000780,
                 timestamp: Date.now()
             })
         }, BasicResponseSchema);
@@ -276,6 +271,18 @@ export class SecurityManager implements APIManager {
     public deleteAccount = async (email: Safe<string>, password: Safe<string>): Promise<BasicResponse> => {
         return await this.__httpWorkflow.sendPost<BasicResponse>({
             path: `${this.endpoint}/account/delete-request`,
+            body: JSON.stringify({
+                deviceID: this.__httpWorkflow.getHeader('NDCDEVICEID'),
+                secret: `0 ${password}`,
+                email: email,
+                timestamp: Date.now()
+            })
+        }, BasicResponseSchema);
+    };
+
+    public restoreAccount = async (email: Safe<string>, password: Safe<string>): Promise<BasicResponse> => {
+        return await this.__httpWorkflow.sendEarlyPost<BasicResponse>({
+            path: `${this.endpoint}/account/delete-request/cancel`,
             body: JSON.stringify({
                 deviceID: this.__httpWorkflow.getHeader('NDCDEVICEID'),
                 secret: `0 ${password}`,

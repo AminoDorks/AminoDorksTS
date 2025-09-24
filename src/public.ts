@@ -1,5 +1,20 @@
 import { z } from 'zod';
 
+enum TokenTypesEnum {
+    Google = 30,
+    Facebook = 10
+};
+
+enum MessageTypesEnum {
+    General = 0,
+    Strike = 1,
+    ShareExurl = 50,
+    ShareUser = 51
+};
+
+export const TokenType = z.enum(TokenTypesEnum);
+export const MessageType = z.enum(MessageTypesEnum);
+
 export const EnviromentUnion = z.union([
     z.literal('global'),
     z.literal('ndc')
@@ -92,15 +107,6 @@ export const EditThreadBuilderSchema = z.object({
     pinAnnouncement: z.boolean().optional()
 });
 
-enum MessageTypesEnum {
-    General = 0,
-    Strike = 1,
-    ShareExurl = 50,
-    ShareUser = 51
-};
-
-export const MessageType = z.enum(MessageTypesEnum);
-
 export const MessageSettingsSchema = z.object({
     messageType: MessageType.default(0).optional(),
     mentionedArray: z.array(z.string()).optional(),
@@ -136,6 +142,19 @@ export const LinkSnippetSchema = z.object({
     media: z.instanceof(Buffer)
 });
 
+export const RegisterBuilderSchema = z.object({
+    token: z.string(),
+    tokenType: TokenType,
+    password: z.string(),
+    nickname: z.string(),
+    deviceId: z.string().optional()
+});
+
+export const ImageMetadataSchema = z.object({
+    width: z.number(),
+    height: z.number()
+});
+
 export type MediaType = z.infer<typeof MediaTypeUnion>;
 export type CommentsSorting = z.infer<typeof CommentsSortingUnion>;
 export type UsersType = z.infer<typeof UsersTypeUnion>;
@@ -157,3 +176,5 @@ export type Timer = z.infer<typeof TimerSchema>;
 export type Timers = z.infer<typeof TimersArray>;
 export type EditProfileBuilder = z.infer<typeof EditProfileBuilderSchema>;
 export type LinkSnippet = z.infer<typeof LinkSnippetSchema>;
+export type RegisterBuilder = z.infer<typeof RegisterBuilderSchema>;
+export type ImageMetadata = z.infer<typeof ImageMetadataSchema>;
