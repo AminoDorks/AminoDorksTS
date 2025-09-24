@@ -16,7 +16,7 @@ const cacheSave = () => {
 
     for (const [key, value] of QUICKLRU.entries()) {
         cacheToSave[key] = value;
-        writeFileSync(CACHE_FILENAME, JSON.stringify(cacheToSave));
+        writeFileSync(CACHE_FILENAME, JSON.stringify(cacheToSave, null, 4));
     };
 };
 

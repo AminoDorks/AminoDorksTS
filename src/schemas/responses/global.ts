@@ -8,7 +8,6 @@ import { WalletSchema } from '../aminoapps/wallet';
 import { TransactionSchema } from '../aminoapps/transaction';
 
 export const LoginResponseSchema = z.object({
-    ...BasicResponseSchema.shape,
     sid: z.string(),
     userProfile: UserSchema
 });

@@ -33,7 +33,7 @@ export class SecurityManager implements APIManager {
         }, BasicResponseSchema);
     };
 
-    private __loginFromCache = async (cachedAccount: CachedAccount): Promise<LoginResponse> => {
+    private __loginFromCache = async (cachedAccount: CachedAccount, updateKey: boolean): Promise<LoginResponse> => {
         this.account = cachedAccount.account;
         this.__httpWorkflow.headers = {
             AUID: cachedAccount.account.user.uid,
@@ -42,10 +42,9 @@ export class SecurityManager implements APIManager {
         };
         LOGGER.info({ nickname: cachedAccount.account.user.nickname }, 'Logged from cache.');
 
-        const publicKeyResponse = await this.__updatePublicKey(cachedAccount.account.user.uid);
+        if (updateKey) await this.__updatePublicKey(cachedAccount.account.user.uid);
 
         return LoginResponseSchema.parse({
-            ...publicKeyResponse,
             sid: cachedAccount.account.sessionId,
             userProfile: cachedAccount.account.user
         });
@@ -80,9 +79,9 @@ export class SecurityManager implements APIManager {
         return getAccountResponse.account;
     };
 
-    public login = async (email: Safe<string>, password: Safe<string>, loginType: Safe<number> = 100): Promise<LoginResponse> => {
+    public login = async (email: Safe<string>, password: Safe<string>, updateKey = true, loginType = 100): Promise<LoginResponse> => {
         const cachedAccount = QUICKLRU.get(`${email}-${password}`);
-        if (cachedAccount && (await this.__getAccountWithSession(cachedAccount))) return this.__loginFromCache(cachedAccount);
+        if (cachedAccount && (await this.__getAccountWithSession(cachedAccount))) return this.__loginFromCache(cachedAccount, updateKey);
 
         const loginResponse = await this.__httpWorkflow.sendEarlyPost<LoginResponse>({
             path: `${this.endpoint}/auth/login`,
@@ -114,12 +113,15 @@ export class SecurityManager implements APIManager {
             password: password
         });
 
-        await this.__updatePublicKey(loginResponse.userProfile.uid);
+        if (updateKey) await this.__updatePublicKey(loginResponse.userProfile.uid);
         
-        return loginResponse;
+        return LoginResponseSchema.parse({
+            sid: loginResponse.sid,
+            userProfile: loginResponse.userProfile
+        });
     };
 
-    public loginPhone = async (phone: Safe<string>, password: Safe<string>, loginType: Safe<number> = 100): Promise<LoginResponse> => {
+    public loginPhone = async (phone: Safe<string>, password: Safe<string>, loginType: Safe<number> = 100, updateKey = true): Promise<LoginResponse> => {
         const loginResponse = await this.__httpWorkflow.sendEarlyPost<LoginResponse>({
             path: `${this.endpoint}/auth/login`,
             body: JSON.stringify({
@@ -144,12 +146,12 @@ export class SecurityManager implements APIManager {
             NDCAUTH: `sid=${loginResponse.sid}`
         };
 
-        await this.__updatePublicKey(loginResponse.userProfile.uid);
+        if (updateKey) await this.__updatePublicKey(loginResponse.userProfile.uid);
 
         return loginResponse;
     };
 
-    public loginWithSession = async (sessionId: Safe<string>, deviceId: Safe<string>): Promise<MayUndefined<BasicResponse>> => {
+    public loginWithSession = async (sessionId: Safe<string>, deviceId: Safe<string>, updateKey = true): Promise<MayUndefined<BasicResponse>> => {
         let sessionData: SessionData;
 
         try {
@@ -173,7 +175,7 @@ export class SecurityManager implements APIManager {
             user: accountInfo
         })
 
-        return await this.__updatePublicKey(sessionData.userId);
+        if (updateKey) return await this.__updatePublicKey(sessionData.userId);
     };
 
     public register = async (builder: RegisterBuilder): Promise<BasicResponse> => {
