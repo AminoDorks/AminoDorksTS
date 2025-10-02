@@ -10,7 +10,6 @@ export const AminoDorksConfigSchema = z.object({
     ndcId: z.number().optional(),
     enableLogging: z.boolean().optional(),
     deviceId: z.string().min(82).max(82).optional(),
-    proxies: z.array(z.string()).optional(),
     httpWorkflow: z.instanceof(HttpWorkflow).optional(),
     account: AccountSchema.optional(),
     quicklru: z.object({

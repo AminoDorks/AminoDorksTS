@@ -40,8 +40,6 @@ export const BufferRequestConfigSchema = z.object({
     body: z.instanceof(Buffer)
 });
 
-export const AllConfigs = z.union([GetRequestConfigSchema, PostRequestConfigSchema, UrlEncodedRequestConfigSchema, DeleteRequestConfigSchema, RawRequestConfigSchema, BufferRequestConfigSchema]);
-
 export type GetPublicKeyCredentialsResponse = z.infer<typeof GetPublicKeyCredentialsResponseSchema>;
 export type PostRequestConfig = z.infer<typeof PostRequestConfigSchema>;
 export type GetRequestConfig = z.infer<typeof GetRequestConfigSchema>;
@@ -50,4 +48,3 @@ export type UrlEncodedRequestConfig = z.infer<typeof UrlEncodedRequestConfigSche
 export type RawRequestConfig = z.infer<typeof RawRequestConfigSchema>;
 export type BufferRequestConfig = z.infer<typeof BufferRequestConfigSchema>;
 export type GetElapsedRealtime = z.infer<typeof GetElapsedRealtimeSchema>;
-export type AllConfigs = z.infer<typeof AllConfigs>;

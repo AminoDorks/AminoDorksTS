@@ -18,6 +18,7 @@ import initQuickLRU from '../utils/qucklru';
 import { SocketWorkflow } from './socketsworkflow';
 import { generateDeviceId } from '../utils/crypt';
 import { ACMManager } from '../managers/acmManager';
+import { convertProxy } from '../utils/utils';
 
 export class AminoDorks {
     private __config: AminoDorksConfig;
@@ -42,7 +43,7 @@ export class AminoDorks {
         initLogger(!!config.enableLogging);
         initQuickLRU(config.quicklru?.maxAge, config.quicklru?.maxSize);
         
-        this.__httpWorkflow = config.httpWorkflow || new HttpWorkflow(config.apiKey, this.__config.deviceId, this.__config.proxies);
+        this.__httpWorkflow = config.httpWorkflow || new HttpWorkflow(config.apiKey, this.__config.deviceId);
     };
 
     public get account(): Account {
@@ -132,6 +133,14 @@ export class AminoDorks {
         if (!this.__socketWorkflow) return this.__socketWorkflow = new SocketWorkflow(this);
 
         return this.__socketWorkflow;
+    };
+
+    set proxy(proxy: string) {
+        try {
+            this.__httpWorkflow.proxy = convertProxy(proxy);
+        } catch (e) {
+            LOGGER.error(e, 'Invalid proxy.');
+        };
     };
 
     private __basicUpload = async (path: Safe<string>, file: Safe<Buffer>, type: Safe<MediaType>): Promise<UploadMediaResponse> => {
