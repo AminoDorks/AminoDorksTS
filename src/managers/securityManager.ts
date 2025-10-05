@@ -96,22 +96,24 @@ export class SecurityManager implements APIManager {
             })
         }, LoginResponseSchema);
 
-        this.account = AccountSchema.parse({
-            sessionId: loginResponse.sid,
-            deviceId: this.__config.deviceId,
-            user: loginResponse.userProfile
-        });
+        if (loginType != 300) {
+                this.account = AccountSchema.parse({
+                sessionId: loginResponse.sid,
+                deviceId: this.__config.deviceId,
+                user: loginResponse.userProfile
+            });
 
-        this.__httpWorkflow.headers = {
-            AUID: loginResponse.userProfile.uid,
-            NDCAUTH: `sid=${loginResponse.sid}`
+            this.__httpWorkflow.headers = {
+                AUID: loginResponse.userProfile.uid,
+                NDCAUTH: `sid=${loginResponse.sid}`
+            };
+
+            cacheSet(`${email}-${password}`, {
+                account: this.account,
+                email: email,
+                password: password
+            });
         };
-
-        cacheSet(`${email}-${password}`, {
-            account: this.account,
-            email: email,
-            password: password
-        });
 
         if (updateKey) await this.__updatePublicKey(loginResponse.userProfile.uid);
         
