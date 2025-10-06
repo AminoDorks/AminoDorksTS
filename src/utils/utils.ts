@@ -10,10 +10,27 @@ export const formatMediaList = (rawMediaList: string[]) => rawMediaList.map((med
 export const formatMedia = (media?: string) => media ? [[100, media, null]] : null;
 
 export const convertProxy = (proxy: string): SocksProxies => {
+    const match = proxy.match(/socks([45])/);
+
+    if (proxy.includes('@')) {
+        const splittedPart = proxy.split('@');
+        const [, userId, password] = splittedPart[0].split(':');
+        const [host, port] = splittedPart[1].split(':');
+
+        return {
+            host,
+            type: match ? Number(match[1]) as 4 | 5 : 5,
+            port: Number(port),
+            userId,
+            password
+        };
+    };
+
     const [host, port] = proxy.slice(9).split(':');
+
     return {
         host,
-        type: Number(proxy.slice(5, 6)) as 5 | 4,
+        type: match ? Number(match[1]) as 4 | 5 : 5,
         port: Number(port)
     };
 };

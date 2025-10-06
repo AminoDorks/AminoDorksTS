@@ -24,15 +24,6 @@ export class SecurityManager implements APIManager {
         this.__httpWorkflow = httpWorkflow;
     };
 
-    private __updatePublicKey = async (userId: Safe<string>): Promise<BasicResponse> => {
-        return await this.__httpWorkflow.sendPost<BasicResponse>({
-            path: `${this.endpoint}/security/public_key`,
-            body: JSON.stringify(
-                (await this.__httpWorkflow.getPublicKeyCredentials(userId)).credentials
-            )
-        }, BasicResponseSchema);
-    };
-
     private __loginFromCache = async (cachedAccount: CachedAccount, updateKey: boolean): Promise<LoginResponse> => {
         this.account = cachedAccount.account;
         this.__httpWorkflow.headers = {
@@ -42,7 +33,7 @@ export class SecurityManager implements APIManager {
         };
         LOGGER.info({ nickname: cachedAccount.account.user.nickname }, 'Logged from cache.');
 
-        if (updateKey) await this.__updatePublicKey(cachedAccount.account.user.uid);
+        if (updateKey) await this.updatePublicKey(cachedAccount.account.user.uid);
 
         return LoginResponseSchema.parse({
             sid: cachedAccount.account.sessionId,
@@ -77,6 +68,15 @@ export class SecurityManager implements APIManager {
         if (getAccountResponse['api:statuscode'] != 0) return;
 
         return getAccountResponse.account;
+    };
+
+    public updatePublicKey = async (userId: Safe<string>): Promise<BasicResponse> => {
+        return await this.__httpWorkflow.sendPost<BasicResponse>({
+            path: `${this.endpoint}/security/public_key`,
+            body: JSON.stringify(
+                (await this.__httpWorkflow.getPublicKeyCredentials(userId)).credentials
+            )
+        }, BasicResponseSchema);
     };
 
     public login = async (email: Safe<string>, password: Safe<string>, updateKey = true, loginType = 100): Promise<LoginResponse> => {
@@ -115,7 +115,7 @@ export class SecurityManager implements APIManager {
             });
         };
 
-        if (updateKey) await this.__updatePublicKey(loginResponse.userProfile.uid);
+        if (updateKey) await this.updatePublicKey(loginResponse.userProfile.uid);
         
         return LoginResponseSchema.parse({
             sid: loginResponse.sid,
@@ -148,7 +148,7 @@ export class SecurityManager implements APIManager {
             NDCAUTH: `sid=${loginResponse.sid}`
         };
 
-        if (updateKey) await this.__updatePublicKey(loginResponse.userProfile.uid);
+        if (updateKey) await this.updatePublicKey(loginResponse.userProfile.uid);
 
         return loginResponse;
     };
@@ -177,7 +177,7 @@ export class SecurityManager implements APIManager {
             user: accountInfo
         })
 
-        if (updateKey) return await this.__updatePublicKey(sessionData.userId);
+        if (updateKey) return await this.updatePublicKey(sessionData.userId);
     };
 
     public register = async (builder: RegisterBuilder): Promise<BasicResponse> => {
