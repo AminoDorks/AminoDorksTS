@@ -175,10 +175,6 @@ export class AminoDorks {
         }, CommunityResolutionResponseSchema)).linkInfoV2.extensions.community;
     };
 
-    public getElapsedRealtime = async (): Promise<string> => {
-        return (await this.__httpWorkflow.getElapsedRealtime()).elapsedRealtime;
-    };
-
     as = (ndcId: number): AminoDorks => {
         return new AminoDorks({
             ...this.__config,

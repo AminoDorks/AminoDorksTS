@@ -3,15 +3,15 @@ import WebSocket from 'ws';
 import { Safe } from '../private';
 import { SOCKET_TOPICS, WEBSOCKET_HEADERS, WEBSOCKET_RECONNECT_TIME } from '../constants';
 import { generateHMAC } from '../utils/crypt';
-import { BasicEvent, CommandArgsCallback, CommandCallback, ElapsedRealtimeObject, EventMap, EventName, MessageEvent, WebSocketCallback } from '../schemas/sockets/sockets';
+import { BasicEvent, CommandArgsCallback, CommandCallback, EventMap, EventName, MessageEvent, WebSocketCallback } from '../schemas/sockets/sockets';
 import { LOGGER } from '../utils/logger';
 import { AminoDorks } from './aminodorks';
 import { ArgImpl } from '../schemas/sockets/args';
+import { generateElapsedTime } from '../utils/utils';
 
 export class SocketWorkflow {
     private readonly __client: AminoDorks;
     private __websocket?: WebSocket;
-    private __elapsedTimestamp?: ElapsedRealtimeObject;
     
     private __listeners: Map<Safe<EventName>, Set<WebSocketCallback>> = new Map<Safe<EventName>, Set<WebSocketCallback>>();
     private __ndcs: Map<Safe<number>, AminoDorks> = new Map<Safe<number>, AminoDorks>();
@@ -22,20 +22,6 @@ export class SocketWorkflow {
     constructor(client: AminoDorks) {
         this.__client = client;
         this.__reconnect();
-    };
-
-    private __getElapsedRealtime = async (): Promise<{ elapsedRealtime: string; timestamp: number; }> => {
-        if (!this.__elapsedTimestamp) {
-            return this.__elapsedTimestamp = {
-                elapsedRealtime: await this.__client.getElapsedRealtime(),
-                timestamp: Date.now(),
-            };
-        };
-
-        return this.__elapsedTimestamp = {
-            elapsedRealtime: (Number(this.__elapsedTimestamp.elapsedRealtime) + (Date.now() - this.__elapsedTimestamp.timestamp)).toString(),
-            timestamp: Date.now(),
-        };
     };
 
     private __runVoiceChat = (ndcId: number, threadId: string): void => {
@@ -49,7 +35,7 @@ export class SocketWorkflow {
                     ndcId: ndcId,
                     threadId: threadId,
                     joinRole: 1,
-                    id: (await this.__getElapsedRealtime()).elapsedRealtime
+                    id: generateElapsedTime()
                 },
                 t: 112
             }));
@@ -70,7 +56,6 @@ export class SocketWorkflow {
         });
         LOGGER.info({ url: this.__websocket.url }, 'Socket connected.');
         this.__setupSocketWorkflow();
-        this.__getElapsedRealtime();
     };
 
     private __onServiceUnavailable = (): void => {
@@ -178,7 +163,7 @@ export class SocketWorkflow {
                 ndcId: ndcId,
                 threadId: threadId,
                 joinRole: 1,
-                id: (await this.__getElapsedRealtime()).elapsedRealtime
+                id: generateElapsedTime()
             },
             t: 112
         }));
@@ -191,7 +176,7 @@ export class SocketWorkflow {
                 threadId: threadId,
                 joinRole: 1,
                 channelType: 5,
-                id: (await this.__getElapsedRealtime()).elapsedRealtime
+                id: generateElapsedTime()
             },
             t: 108
         }));
@@ -203,14 +188,14 @@ export class SocketWorkflow {
                 ndcId: ndcId,
                 threadId: threadId,
                 joinRole: 2,
-                id: (await this.__getElapsedRealtime()).elapsedRealtime
+                id: generateElapsedTime()
             },
             t: 112
         }));
     };
 
     public startVoiceChat = async (ndcId: number, threadId: string): Promise<void> => {
-        const { elapsedRealtime } = await this.__getElapsedRealtime();
+        const elapsedRealtime = generateElapsedTime();
 
         this.send(JSON.stringify({
             o: {
@@ -257,7 +242,7 @@ export class SocketWorkflow {
                 params: {
                     threadType: 2
                 },
-                id: (await this.__getElapsedRealtime()).elapsedRealtime
+                id: generateElapsedTime()
             },
             t: 304
         }));
@@ -272,7 +257,7 @@ export class SocketWorkflow {
                 params: {
                     threadType: 0
                 },
-                id: (await this.__getElapsedRealtime()).elapsedRealtime
+                id: generateElapsedTime()
             },
             t: 304
         }));
@@ -288,7 +273,7 @@ export class SocketWorkflow {
                     threadType: 0,
                     duration: duration
                 },
-                id: (await this.__getElapsedRealtime()).elapsedRealtime
+                id: generateElapsedTime()
             },
             t: 306
         }));
@@ -303,7 +288,7 @@ export class SocketWorkflow {
                 params: {
                     topicIds
                 },
-                id: (await this.__getElapsedRealtime()).elapsedRealtime
+                id: generateElapsedTime()
             },
             t: 304
         }));
@@ -331,7 +316,7 @@ export class SocketWorkflow {
                     threadType: 0,
                     membershipStatus: 0
                 },
-                id: (await this.__getElapsedRealtime()).elapsedRealtime
+                id: generateElapsedTime()
             },
             t: 304
         }));

@@ -80,11 +80,6 @@ export const CommandDataSchema = z.object({
     ndcId: z.number(),
 });
 
-export const ElapsedRealtimeObjectSchema = z.object({
-    elapsedRealtime: z.string(),
-    timestamp: z.number()
-});
-
 export type BasicEvent = z.infer<typeof BasicEventSchema>;
 export type MessageEvent = z.infer<typeof MessageEventSchema>;
 export type NotificationEvent = z.infer<typeof NotificationEventSchema>;
@@ -95,4 +90,3 @@ export type CommandData = z.infer<typeof CommandDataSchema>;
 export type WebSocketCallback = (ndc: AminoDorks, data: WebSocketEvent) => Promise<void>;
 export type CommandCallback = (ndc: AminoDorks, callbackData: CommandData) => Promise<void>;
 export type CommandArgsCallback = (ndc: AminoDorks, callbackData: CommandData, args: Arg[]) => Promise<void>;
-export type ElapsedRealtimeObject = z.infer<typeof ElapsedRealtimeObjectSchema>;

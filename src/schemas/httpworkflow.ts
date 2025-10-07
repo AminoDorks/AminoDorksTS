@@ -15,11 +15,6 @@ export const GetPublicKeyCredentialsResponseSchema = z.object({
     message: z.string().readonly()
 });
 
-export const GetElapsedRealtimeSchema = z.object({
-    elapsedRealtime: z.string(),
-    message: z.string()
-});
-
 export const PostRequestConfigSchema = z.object({
     path: z.string().readonly(),
     body: z.string().readonly(),
@@ -47,4 +42,3 @@ export type DeleteRequestConfig = z.infer<typeof DeleteRequestConfigSchema>
 export type UrlEncodedRequestConfig = z.infer<typeof UrlEncodedRequestConfigSchema>;
 export type RawRequestConfig = z.infer<typeof RawRequestConfigSchema>;
 export type BufferRequestConfig = z.infer<typeof BufferRequestConfigSchema>;
-export type GetElapsedRealtime = z.infer<typeof GetElapsedRealtimeSchema>;

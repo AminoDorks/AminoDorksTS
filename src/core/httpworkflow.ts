@@ -5,7 +5,7 @@ import BodyReadable from 'undici/types/readable';
 import { API_HEADERS, BASE_URL, EMPTY_BODY, GENERATORS_HEADERS, GENERATORS_URL } from '../constants';
 import { HeadersType, MayUndefined, Safe } from '../private';
 import { generateHMAC } from '../utils/crypt';
-import { BufferRequestConfig, DeleteRequestConfig, GenerateECDSAResponseSchema, GetElapsedRealtime, GetElapsedRealtimeSchema, GetPublicKeyCredentialsResponse, GetPublicKeyCredentialsResponseSchema, GetRequestConfig, PostRequestConfig, RawRequestConfig, UrlEncodedRequestConfig } from '../schemas/httpworkflow';
+import { BufferRequestConfig, DeleteRequestConfig, GenerateECDSAResponseSchema, GetPublicKeyCredentialsResponse, GetPublicKeyCredentialsResponseSchema, GetRequestConfig, PostRequestConfig, RawRequestConfig, UrlEncodedRequestConfig } from '../schemas/httpworkflow';
 import { BasicResponseSchema } from '../schemas/responses/basic';
 import { LOGGER } from '../utils/logger';
 import { isStatusOk } from '../utils/utils';
@@ -116,16 +116,6 @@ export class HttpWorkflow {
         if (!response.credentials) throw new DorksAPIError(response.message);
 
         return response;
-    };
-
-    public getElapsedRealtime = async (): Promise<GetElapsedRealtime> => {
-        const { body } = await this.__generatorsPool.request({
-            path: `/api/v1/signature/getElapsed`,
-            method: 'GET',
-            headers: this.__generatorsHeaders
-        });
-
-        return GetElapsedRealtimeSchema.parse(await body.json());
     };
 
     public sendRaw = async <T>(config: RawRequestConfig, schema: z.ZodSchema): Promise<T> => {
