@@ -16,6 +16,7 @@ export const UserSchema = z.object({
   postsCount: z.number().optional(),
   membersCount: z.number().optional(),
   nickname: z.string(),
+  content: z.string().optional().nullable(),
   icon: z.string().nullable(),
   isNicknameVerified: z.boolean().optional(),
   mood: z.string().nullable().optional(),

@@ -1,6 +1,6 @@
 {
   "name": "amino.dorks",
-  "version": "2.22.26",
+  "version": "2.22.27",
   "private": false,
   "main": "dist/index.js",
   "scripts": {
