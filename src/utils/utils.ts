@@ -23,7 +23,7 @@ export const convertProxy = (proxy: string): SocksProxies => {
             host,
             type: match ? Number(match[1]) as 4 | 5 : 5,
             port: Number(port),
-            userId,
+            userId: userId.slice(2),
             password
         };
     };
