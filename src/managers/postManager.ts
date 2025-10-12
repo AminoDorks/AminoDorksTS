@@ -115,7 +115,29 @@ export class PostManager implements APIManager {
                 content: content,
                 type: 0,
                 eventSource: 'PostDetailView',
-                respondTo: respondTo,
+                respondTo,
+                timestamp: Date.now()
+            })
+        }, BasicResponseSchema);
+    };
+
+    public likeBlog = async (blogId: Safe<string>): Promise<BasicResponse> => {
+        return await this.__httpWorkflow.sendPost<BasicResponse>({
+            path: `${this.endpoint}/blog/${blogId}/vote?cv=1.2`,
+            body: JSON.stringify({
+                value: 4,
+                eventSource: 'UserProfileView',
+                timestamp: Date.now()
+            })
+        }, BasicResponseSchema);
+    };
+
+    public likeWiki = async (itemId: Safe<string>): Promise<BasicResponse> => {
+        return await this.__httpWorkflow.sendPost<BasicResponse>({
+            path: `${this.endpoint}/item/${itemId}/vote?cv=1.2`,
+            body: JSON.stringify({
+                value: 4,
+                eventSource: 'PostDetailView',
                 timestamp: Date.now()
             })
         }, BasicResponseSchema);

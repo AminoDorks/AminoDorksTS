@@ -18,6 +18,7 @@ export class HttpWorkflow {
     private __generatorsHeaders: HeadersType = GENERATORS_HEADERS;
 
     private readonly __generatorsPool: Pool;
+    private __currentProxy: MayUndefined<string>;
     private __currentDispatcher: MayUndefined<ProxyAgent>;
 
     constructor(apiKey: string, deviceId: string) {
@@ -34,9 +35,12 @@ export class HttpWorkflow {
         };
     };
 
-    set proxy(proxy: SocksProxies) {
+    get proxy(): MayUndefined<string> { return this.__currentProxy; }
+
+    public setProxies = (raw: string, proxy: SocksProxies) => {
         if (this.__currentDispatcher) this.__currentDispatcher.close();
 
+        this.__currentProxy = raw;
         this.__currentDispatcher = socksDispatcher(proxy, {
             connect: {
                 rejectUnauthorized: false

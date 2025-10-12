@@ -8,6 +8,7 @@ import { LOGGER } from '../utils/logger';
 import { AminoDorks } from './aminodorks';
 import { ArgImpl } from '../schemas/sockets/args';
 import { generateElapsedTime } from '../utils/utils';
+import { SocksProxyAgent } from 'socks-proxy-agent';
 
 export class SocketWorkflow {
     private readonly __client: AminoDorks;
@@ -46,13 +47,14 @@ export class SocketWorkflow {
         if (this.__websocket) this.__websocket.close();
         const signData = this.__client.account.deviceId.concat(`|${Date.now()}`);
         this.__websocket = new WebSocket(`${this.__websocketUrl}/?signbody=${signData.replace(/\|/g, '%7C')}`, {
-        headers: {
-            ...WEBSOCKET_HEADERS,
-            'AUID': this.__client.account.user.uid,
-            'NDCAUTH': `sid=${this.__client.account.sessionId}`,
-            'NDCDEVICEID': this.__client.account.deviceId,
-            'NDC-MSG-SIG': generateHMAC(Buffer.from(signData))
-        }
+            headers: {
+                ...WEBSOCKET_HEADERS,
+                'AUID': this.__client.account.user.uid,
+                'NDCAUTH': `sid=${this.__client.account.sessionId}`,
+                'NDCDEVICEID': this.__client.account.deviceId,
+                'NDC-MSG-SIG': generateHMAC(Buffer.from(signData))
+            },
+            agent: this.__client.proxy ? new SocksProxyAgent(this.__client.proxy) : undefined
         });
         LOGGER.info({ url: this.__websocket.url }, 'Socket connected.');
         this.__setupSocketWorkflow();

@@ -97,7 +97,7 @@ export class SecurityManager implements APIManager {
         }, LoginResponseSchema);
 
         if (loginType != 300) {
-                this.account = AccountSchema.parse({
+            this.account = AccountSchema.parse({
                 sessionId: loginResponse.sid,
                 deviceId: this.__config.deviceId,
                 user: loginResponse.userProfile

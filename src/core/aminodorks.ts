@@ -3,7 +3,7 @@ import { HttpWorkflow } from './httpworkflow';
 import { SecurityManager } from '../managers/securityManager';
 import { Account } from '../schemas/aminodorks';
 import { MediaType } from '../public';
-import { Safe } from '../private';
+import { MayUndefined, Safe } from '../private';
 import { CommunityResolutionResponse, CommunityResolutionResponseSchema, LinkResolutionResponse, LinkResolutionResponseSchema, UploadMediaResponse, UploadMediaResponseSchema } from '../schemas/responses/global';
 import { CommunityManager } from '../managers/communityManager';
 import { WalletManager } from '../managers/walletManager';
@@ -135,9 +135,14 @@ export class AminoDorks {
         return this.__socketWorkflow;
     };
 
+    get proxy(): MayUndefined<string> { return this.__httpWorkflow.proxy; };
+
     set proxy(proxy: string) {
         try {
-            this.__httpWorkflow.proxy = convertProxy(proxy);
+            this.__httpWorkflow.setProxies(
+                proxy,
+                convertProxy(proxy)
+            )
         } catch (e) {
             LOGGER.error(e, 'Invalid proxy.');
         };
