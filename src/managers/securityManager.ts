@@ -11,6 +11,7 @@ import { cacheSet, QUICKLRU } from '../utils/qucklru';
 import { decodeSession } from '../utils/crypt';
 import { SessionData } from '../schemas/crypt';
 import { User } from '../schemas/aminoapps/user';
+import { getUserBySession } from '../utils/utils';
 
 export class SecurityManager implements APIManager {
     endpoint: Safe<string> = '/g/s';
@@ -169,8 +170,7 @@ export class SecurityManager implements APIManager {
             NDCAUTH: `sid=${sessionId}`
         };
 
-        const accountInfo = await this.getAccount();
-        if (!accountInfo) return;
+        const accountInfo = getUserBySession(sessionId) || await this.getAccount();
         this.account = AccountSchema.parse({
             sessionId: sessionId,
             deviceId: deviceId,

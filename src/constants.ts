@@ -10,7 +10,7 @@ export const CACHE_FILENAME = 'cache.json';
 export const INVITE_CODE_DEFAULT_DURATION = 259200;
 export const ONLINE_DEFAULT_DURATION = 86400;
 export const WEBSOCKET_RECONNECT_TIME = 450000;
-export const CURRENT_VERSION = '2.23.29';
+export const CURRENT_VERSION = '2.24.29';
 export const TELEGRAM_URL = 'https://t.me/aminodorks';
 
 // Structures

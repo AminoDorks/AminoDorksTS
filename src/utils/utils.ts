@@ -1,5 +1,8 @@
 import { SocksProxies } from 'fetch-socks';
 import { UTC } from '../constants';
+import { User } from '../schemas';
+import { QUICKLRU } from './qucklru';
+import { MayUndefined } from '../private';
 
 export const isStatusOk = (status: number) => status >= 200 && status < 300;
 
@@ -10,6 +13,12 @@ export const formatMediaList = (rawMediaList: string[]) => rawMediaList.map((med
 export const formatMedia = (media?: string) => media ? [[100, media, null]] : null;
 
 export const generateElapsedTime = (): string => (performance.now() / 1000 + Math.floor(Math.random() * 101)).toString();
+
+export const getUserBySession = (sessionId: string): MayUndefined<User> => {
+    for (const account of QUICKLRU.values()) {
+        if (account.account.sessionId == sessionId) return account.account.user;
+    };
+};
 
 export const convertProxy = (proxy: string): SocksProxies => {
     const match = proxy.match(/socks([45])/);
