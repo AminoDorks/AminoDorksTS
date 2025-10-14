@@ -9,8 +9,8 @@
     <h2>AminoDorksTS is a TypeScript library that interacts with the AminoApps API.</h2>
 </div>
 
-##[README on English](https://github.com/thatcelt/AminoDorksTS/blob/master/README.MD)
-##[README на Русском](https://github.com/thatcelt/AminoDorksTS/blob/master/README.RU.MD)
+## [README on English](https://github.com/thatcelt/AminoDorksTS/blob/master/README.MD)
+## [README на Русском](https://github.com/thatcelt/AminoDorksTS/blob/master/README.RU.MD)
 
 ## Table of Contents
 -----------------
@@ -78,7 +78,7 @@ import { AminoDorks } from 'amino.dorks';
     await aminoDorks.security.login('email@example.com', 'password');
     
     const ndc = aminoDorks.as('NDC_ID') // now we can use this instance for interacting with community
-    await ndc.playLottery() // for example, for play lottery to get some coins
+    await ndc.wallet.playLottery() // for example, for play lottery to get some coins
 })();
 ```
 
@@ -98,7 +98,7 @@ import { MessageEvent } from 'amino.dorks/dist/schemas';
     await aminoDorks.security.login('email@example.com', 'password');
     
     // setup on start of socket
-    aminoDorks.socket.on(async () => {
+    aminoDorks.socket.open(async () => {
         // do something
     });
 
@@ -120,21 +120,21 @@ config - configuration for library, you can find it in `AminoDorksConfig` type..
 *    context - context for library, you can find it in `EnviromentContext` type,
 *    ndcId - default ndc id, if you want to use another ndc id, you can use `as` method,
 *    enableLogging - enable logging for library, default value is `false`,
-*    deviceId - default device id,
-*    proxies - array of proxies, socks4 or socks5, default value is `[]`,
+*    deviceId - default device id
 
 #### AminoDorks Properties
 
 1. `AminoDorks.account: Account` - Your user profile information after authorization
-2. `AminoDorks.security: SecurityManager` - Manager for authorization methods and account information
-3. `AminoDorks.community: CommunityManager` - Manager for community methods
-4. `AminoDorks.wallet: WalletManager` - Manager for wallet methods
-5. `AminoDorks.user: UserManager` - Manager for user methods
-6. `AminoDorks.post: PostManager` - Manager for post methods
-7. `AminoDorks.thread: ThreadManager` - Manager for chat thread methods
-8. `AminoDorks.admin: AdminManager` - Manager for admin methods
-9. `AminoDorks.acm: ACMManager` - Manager for ACM methods
-10. `AminoDorks.socket: SocketWorkflow` - Manager for socket methods
+2. `AminoDorks.proxy: string` - Proxy for interacting with API
+3. `AminoDorks.security: SecurityManager` - Manager for authorization methods and account information
+4. `AminoDorks.community: CommunityManager` - Manager for community methods
+5. `AminoDorks.wallet: WalletManager` - Manager for wallet methods
+6. `AminoDorks.user: UserManager` - Manager for user methods
+7. `AminoDorks.post: PostManager` - Manager for post methods
+8. `AminoDorks.thread: ThreadManager` - Manager for chat thread methods
+9. `AminoDorks.admin: AdminManager` - Manager for admin methods
+10. `AminoDorks.acm: ACMManager` - Manager for ACM methods
+11. `AminoDorks.socket: SocketWorkflow` - Manager for socket methods
 
 #### AminoDorks Methods
 
@@ -284,6 +284,10 @@ Post manager for post methods
 11. `sendComment(objectId: Safe<string>, postType: Safe<PostType>, content: Safe<string>, respondTo?: Safe<string>): Promise<BasicResponse>` - Method for posting a comment on a blog or wiki. The `postType` specifies the content type (e.g., blog, item). Optionally reply to an existing comment via `respondTo`.
 
 12. `likeManyBlogs(blogIds: Safe<string[]>): Promise<BasicResponse>` - Method for liking multiple blog posts in a single request. Each like contributes to the post's engagement count.
+
+13. `likeBlog(blogId: Safe<string>): Promise<BasicResponse>` - Method for liking a specific blog post.
+
+14. `likeWiki(itemId: Safe<string>): Promise<BasicResponse>` - Method for liking a wiki item.
 
 ### 6. `ThreadManager`
 Thread manager for thread methods

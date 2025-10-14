@@ -9,8 +9,8 @@
     <h2>AminoDorksTS это библиотека на TypeScript для взаимодействия с API приложения Amino</h2>
 </div>
 
-##[README on English](https://github.com/thatcelt/AminoDorksTS/blob/master/README.MD)
-##[README на Русском](https://github.com/thatcelt/AminoDorksTS/blob/master/README.RU.MD)
+## [README on English](https://github.com/thatcelt/AminoDorksTS/blob/master/README.MD)
+## [README на Русском](https://github.com/thatcelt/AminoDorksTS/blob/master/README.RU.MD)
 
 ---
 
@@ -81,7 +81,7 @@ import { AminoDorks } from 'amino.dorks';
     await aminoDorks.security.login('email@example.com', 'password');
     
     const ndc = aminoDorks.as('NDC_ID') // теперь можно использовать этот экземпляр для взаимодействия с сообществом
-    await ndc.playLottery() // например, сыграть в лотерею и получить монеты
+    await ndc.wallet.playLottery() // например, сыграть в лотерею и получить монеты
 })();
 ```
 
@@ -101,7 +101,7 @@ import { MessageEvent } from 'amino.dorks/dist/schemas';
     await aminoDorks.security.login('email@example.com', 'password');
     
     // обработка при старте сокета
-    aminoDorks.socket.on(async () => {
+    aminoDorks.socket.open(async () => {
         // do something
     });
 
@@ -282,6 +282,10 @@ config – конфигурация библиотеки, доступна в т
 11. `sendComment(objectId: Safe<string>, postType: Safe<PostType>, content: Safe<string>, respondTo?: Safe<string>): Promise<BasicResponse>` – комментарий к блогу или вики  
 
 12. `likeManyBlogs(blogIds: Safe<string[]>): Promise<BasicResponse>` – массовые лайки блогов  
+
+13. `likeBlog(blogId: Safe<string>): Promise<BasicResponse>` - метод для лайка блога
+
+14. `likeWiki(itemId: Safe<string>): Promise<BasicResponse>` - метод для лайка вики
 
 ### 7. `ThreadManager`
 Менеджер для работы с чатами
