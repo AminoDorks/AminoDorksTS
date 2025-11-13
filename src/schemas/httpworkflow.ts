@@ -1,8 +1,10 @@
 import { z } from 'zod';
 
 export const GenerateECDSAResponseSchema = z.object({
-    ECDSA: z.string().readonly().optional(),
-    message: z.string().readonly()
+    ecdsa: z.string().readonly().optional(),
+    message: z.string().readonly(),
+    status: z.number().readonly(),
+    timestamp: z.number().readonly()
 });
 
 export const GetPublicKeyCredentialsResponseSchema = z.object({

@@ -51,7 +51,7 @@ export class HttpWorkflow {
 
     private __generateECDSA = async (payloadBody: Safe<string>): Promise<string> => {
         const { body } = await this.__generatorsPool.request({
-            path: '/api/v1/signature/ecdsa',
+            path: '/api/v2/keymaster/sign',
             method: 'POST',
             headers: this.__generatorsHeaders,
             body: JSON.stringify({
@@ -62,9 +62,9 @@ export class HttpWorkflow {
 
         const response = GenerateECDSAResponseSchema.parse(await body.json());
 
-        if (!response.ECDSA) throw new DorksAPIError(response.message);
+        if (!response.ecdsa) throw new DorksAPIError(response.message);
 
-        return response.ECDSA;
+        return response.ecdsa;
     };
 
     private __configureHeaders = (body: Buffer, contentType?: string): HeadersType => {
@@ -110,7 +110,7 @@ export class HttpWorkflow {
 
     public getPublicKeyCredentials = async (userId: Safe<string>): Promise<GetPublicKeyCredentialsResponse> => {
         const { body } = await this.__generatorsPool.request({
-            path: `/api/v1/signature/credentials/${userId}`,
+            path: `/api/v2/keymaster/build-credentials/${userId}`,
             method: 'GET',
             headers: this.__generatorsHeaders
         });

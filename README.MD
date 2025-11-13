@@ -32,7 +32,7 @@ AminoDorks contains a many features as a library for AminoApps, for example
 * Huge priority for creating user bots for stressing
 * Supporting of so much types with API interacting
 * Huge cache system for your accounts
-* [Fully open source code of server-side](https://github.com/thatcelt/dorks_api)
+* [Fully open source code of server-side](https://github.com/AminoDorks/DorksRestAPI)
 
 ## Getting Started
 ---------------
